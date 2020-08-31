@@ -1,0 +1,34 @@
+{
+	"extends": [["spectral:oas", "off"]],
+	"formats": ["oas2", "oas3"],
+	"functionsDir": "./src/spectral/functions",
+	"functions": [
+		"oasResponseHasExample"
+	],
+	"rules": {
+		"validate-create-operation": {
+			"description": "Operations with an operationID that starts with 'create' must have a valid 201 response.",
+			"given": "$.paths.*[?(/^create/.test(@.operationId))]",
+			"severity": "warn",
+			"recommended": true,
+			"type": "validation",
+			"then": {
+				"field": "responses.201",
+				"function": "truthy"
+			}
+		},
+		"validate-response-has-example": {
+			"description": "Operation response bodies should have an example.",
+			"given": "$.paths..responses..content.*",
+			"severity": "warn",
+			"recommended": false,
+			"type": "validation",
+			"then": {
+				"function": "oasResponseHasExample",
+				"functionOptions": {
+				  "value": "test"
+				}
+			}
+		}
+	}
+}

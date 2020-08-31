@@ -15,6 +15,8 @@ const print = require('./utils/printResults');
 const printJson = require('./utils/printJsonResults');
 const printError = require('./utils/printError');
 const preprocessFile = require('./utils/preprocessFile');
+const { Spectral, isOpenApiv2, isOpenApiv3 } = require('@stoplight/spectral');
+const { join } = require('path');
 
 // import the init module for creating a .validaterc file
 const init = require('./utils/init.js');
@@ -234,7 +236,18 @@ const processInput = async function(program) {
 
     // run validator, print the results, and determine if validator passed
     let results;
+    const spectral = new Spectral();
+    spectral.registerFormat('oas2', isOpenApiv2);
+    spectral.registerFormat('oas3', isOpenApiv3);
     try {
+      await spectral.loadRuleset(join(__dirname, '../../.spectral.json'));
+      const result = await spectral.run(originalFile);
+      //console.log('here are the results', result);
+      for (let i = 0; i < result.length; i++) {
+        console.log('Message:', result[i].message);
+        console.log('Path:', result[i].path.join('.'));
+        console.log('Line:', result[i].range);
+      }
       results = validator(swagger, configObject);
     } catch (err) {
       printError(chalk, 'There was a problem with a validator.', getError(err));
