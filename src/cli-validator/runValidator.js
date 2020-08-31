@@ -241,14 +241,14 @@ const processInput = async function(program) {
     spectral.registerFormat('oas3', isOpenApiv3);
     try {
       await spectral.loadRuleset(join(__dirname, '../../.spectral.json'));
-      const result = await spectral.run(originalFile);
+      const spectralResults = await spectral.run(originalFile);
       //console.log('here are the results', result);
-      for (let i = 0; i < result.length; i++) {
-        console.log('Message:', result[i].message);
-        console.log('Path:', result[i].path.join('.'));
-        console.log('Line:', result[i].range);
+      for (let i = 0; i < spectralResults.length; i++) {
+        // console.log('Message:', spectralResults[i].message);
+        // console.log('Path:', spectralResults[i].path.join('.'));
+        // console.log('Line:', spectralResults[i].range);
       }
-      results = validator(swagger, configObject);
+      results = validator(swagger, configObject, spectralResults);
     } catch (err) {
       printError(chalk, 'There was a problem with a validator.', getError(err));
       if (debug) {

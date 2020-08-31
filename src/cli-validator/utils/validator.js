@@ -29,7 +29,7 @@ const validators = {
 };
 
 // this function runs the validators on the swagger object
-module.exports = function validateSwagger(allSpecs, config) {
+module.exports = function validateSwagger(allSpecs, config, spectralResults) {
   const version = getVersion(allSpecs.jsSpec);
   allSpecs.isOAS3 = version === '3';
   const { semanticValidators } = validators[version];
@@ -39,6 +39,42 @@ module.exports = function validateSwagger(allSpecs, config) {
     error: false,
     warning: false
   };
+
+  // add any spectral validation results to the results obj
+  if (spectralResults != null) {
+    spectralResults.forEach(result => {
+      const resultArray = { error: [], warning: [] };
+      const code = result['code'];
+      const severity = result['severity'];
+      const message = result['message'];
+      const path = result['path'];
+      const resultObj = { errors: {}, warnings: {} };
+
+      if (severity == '1') {
+        // warn
+        resultArray.warning.push({
+          message,
+          path
+        });
+      } else {
+        resultArray.error.push({
+          message,
+          path
+        });
+      }
+
+      resultObj.errors = resultArray.error;
+      resultObj.warnings = resultArray.warning;
+      if (resultObj.errors.length) {
+        validationResults.errors[code] = [...resultObj.errors];
+        validationResults.error = true;
+      }
+      if (resultObj.warnings.length) {
+        validationResults.warnings[code] = [...resultObj.warnings];
+        validationResults.warning = true;
+      }
+    });
+  }
 
   // use version specific and shared validations
   // they need to be at the top level of the config object
