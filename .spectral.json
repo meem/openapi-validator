@@ -1,32 +1,57 @@
 {
 	"extends": [["spectral:oas", "off"]],
 	"formats": ["oas2", "oas3"],
-	"functionsDir": "./src/spectral/functions",
-	"functions": [
-		"oasResponseHasExample"
-	],
 	"rules": {
-		"validate-create-operation": {
-			"description": "Operations with an operationID that starts with 'create' must have a valid 201 response.",
-			"given": "$.paths.*[?(/^create/.test(@.operationId))]",
-			"severity": "warn",
-			"recommended": true,
-			"type": "validation",
+		"check-produces-value-case-sensitive": {
+			"description": "'produces' object should not contain the value 'application'",
+			"type": "style",
+			"given": "$.paths..produces.*",
+			"severity": "error",
+			"formats": ["oas2"],
+			"message": "{{path}} contained a value with the invalid string '/produces/'",
 			"then": {
-				"field": "responses.201",
-				"function": "truthy"
+				"function": "pattern",
+				"functionOptions": {
+					"notMatch": "/application/"
+				}
 			}
 		},
-		"validate-response-has-example": {
-			"description": "Operation response bodies should have an example.",
-			"given": "$.paths..responses..content.*",
-			"severity": "warn",
-			"recommended": false,
-			"type": "validation",
+		"check-paths-key-case-sensitive": {
+			"description": "'paths' object should not contain the key 'coolpath'",
+			"type": "style",
+			"given": "$.paths[*]~",
+			"severity": "error",
+			"message": "{{path}} contained an invalid string '/coolpath/'",
 			"then": {
-				"function": "oasResponseHasExample",
+				"function": "pattern",
 				"functionOptions": {
-				  "value": "test"
+					"notMatch": "/coolpath/"
+				}
+			}
+		},
+		"check-info-key-case-sensitive": {
+			"description": "'info' object should not contain the key 'testString'",
+			"type": "style",
+			"given": "$.info[*]~",
+			"severity": "error",
+			"message": "{{path}} contained an invalid string '/testString/'",
+			"then": {
+				"function": "pattern",
+				"functionOptions": {
+					"notMatch": "/testString/"
+				}
+			}
+		},
+		"check-info-value-case-insensitive": {
+			"description": "'info' object should not contain the value 'testString'",
+			"type": "style",
+			"given": "$..info.*",
+			"severity": "error",
+			"message": "{{path}} contained an invalid string '/testString/'",
+			"then": {
+				"function": "pattern",
+				"functionOptions": {
+					"notMatch": "/testString/i"
 				}
 			}
 		}
